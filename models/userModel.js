@@ -9,6 +9,11 @@ const userSchema = mongoose.Schema({
     type: String,
     unique: true,
   },
+  password: {
+    type: String,
+    require: true,
+    select: false,
+  },
 });
 
 const User = mongoose.model("user", userSchema);

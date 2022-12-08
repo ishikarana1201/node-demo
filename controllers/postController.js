@@ -1,6 +1,12 @@
 const Post = require("../models/Posts");
+const jwt = require("jsonwebtoken");
 
 exports.addPost = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+
+  const data = jwt.verify(token, "ASDF");
+  req.body.userId = data.id;
+
   const newPost = await Post.create(req.body);
   res.status(401).json({
     status: "success",
@@ -51,4 +57,3 @@ exports.updatePost = async (req, res) => {
     },
   });
 };
-

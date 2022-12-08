@@ -1,6 +1,9 @@
 const User = require("../models/userModel");
+const bycrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 exports.addUser = async (req, res) => {
+  req.body.password = await bycrypt.hash(req.body.password, 12);
   const newUser = await User.create(req.body);
 
   res.status(201).json({
@@ -52,4 +55,37 @@ exports.updateUser = async (req, res) => {
       user: updateUser,
     },
   });
+};
+
+exports.login = async (req, res) => {
+  const user = await User.findOne({ email: req.body.email }).select(
+    "+password"
+  );
+  const dbPassword = user.password;
+  const password = req.body.password;
+
+  const token = jwt.sign({ id: user._id }, "ASDF");
+
+  if (bycrypt.compare(password, dbPassword)) {
+    res.status(200).json({
+      status: "success",
+      token: token,
+      data: {
+        user: user,
+      },
+    });
+  }
+};
+
+exports.protect = async (req, res, next) => {
+  // 1) Postman token
+  const token = req.headers.authorization.split(" ")[1];
+
+  const data = jwt.verify(token, "ASDF");
+  // console.log(final);
+  if (data.id) {
+    next();
+  } else {
+    res.send("un");
+  }
 };
